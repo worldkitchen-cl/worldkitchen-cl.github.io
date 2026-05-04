@@ -26,7 +26,6 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
 .metric{background:var(--surface);border-radius:var(--radius);padding:1rem 1.25rem;border:1px solid var(--border)}
 .metric-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
 .metric-value{font-size:24px;font-weight:600;color:var(--wk-dark)}
-.metric-sub{font-size:11px;color:var(--muted);margin-top:4px}
 .card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-bottom:1rem}
 .card-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .card-title{font-size:13px;font-weight:600;color:var(--text)}
@@ -38,7 +37,6 @@ tr:hover td{background:var(--bg)}
 .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600}
 .b-green{background:#EAF3DE;color:#3B6D11}
 .b-teal{background:var(--wk-teal-light);color:var(--wk-dark)}
-.b-red{background:#FCEBEB;color:#A32D2D}
 .btn{font-size:13px;padding:8px 16px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);font-family:inherit}
 .btn:hover{background:var(--bg)}
 .btn-coral{background:var(--wk-coral);color:#fff;border:none}
@@ -66,7 +64,6 @@ tr:hover td{background:var(--bg)}
 .login-card{background:var(--surface);border-radius:16px;padding:2rem 2.5rem;width:340px;position:relative;z-index:1}
 .login-logo-wrap{display:flex;justify-content:center;margin-bottom:1.25rem}
 .login-logo{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--wk-teal)}
-.login-logo-fallback{width:90px;height:90px;border-radius:50%;background:var(--wk-coral);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;display:none}
 .login-title{font-size:18px;font-weight:700;color:var(--wk-dark);text-align:center;margin-bottom:4px}
 .login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:1.5rem}
 .login-divider{height:2px;background:linear-gradient(90deg,var(--wk-coral) 50%,var(--wk-teal) 50%);border-radius:1px;margin-bottom:1.5rem}
@@ -87,8 +84,8 @@ tr:hover td{background:var(--bg)}
   <div class="login-page">
     <div class="login-card">
       <div class="login-logo-wrap">
-        <img src="logo.jpg" alt="World Kitchen Chile" class="login-logo" onerror="this.style.display='none';document.getElementById('logoFb').style.display='flex'">
-        <div id="logoFb" class="login-logo-fallback">WK</div>
+        <img src="logo.jpg" alt="WK" class="login-logo" onerror="this.style.display='none';document.getElementById('logoFb').style.display='flex'">
+        <div id="logoFb" style="display:none;width:90px;height:90px;border-radius:50%;background:var(--wk-coral);align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff">WK</div>
       </div>
       <div class="login-title">World Kitchen Chile</div>
       <div class="login-sub">Portal de pedidos para clientes</div>
@@ -102,7 +99,7 @@ tr:hover td{background:var(--bg)}
         </select>
       </div>
       <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="contacto@empresa.cl"/></div>
-      <div class="field"><label>Contraseña (RUT sin puntos ni dígito)</label><input type="password" id="loginPass" placeholder="ej: 12345678" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
       <button class="btn btn-coral" style="width:100%;font-size:14px;padding:11px" onclick="doLogin()">Ingresar</button>
       <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:1rem">¿Problemas? Contacta a tu vendedor</p>
     </div>
@@ -113,8 +110,8 @@ tr:hover td{background:var(--bg)}
   <div class="topbar">
     <div class="topbar-logo">
       <div class="logo-wrap">
-        <img src="logo.jpg" alt="WK" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <span class="logo-fallback">WK</span>
+        <img src="logo.jpg" alt="WK" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <span class="logo-fallback" style="display:none">WK</span>
       </div>
       <div>
         <div class="topbar-name" id="topbarEmpresa">World Kitchen Chile</div>
@@ -202,9 +199,11 @@ tr:hover td{background:var(--bg)}
 
 <script>
 const USUARIOS = {
-  "matias.rivera@worldkitchen.cl": { pass: "wk2024", nombre: "Matias Rivera", empresa: "wk", clienteId: null },
-  "cliente1@empresa.cl": { pass: "12345678", nombre: "Cliente 1", empresa: "wk", clienteId: 123 },
+  "matias.rivera@worldkitchen.cl": {pass:"wk2024", nombre:"Matias Rivera", empresa:"wk"},
+  "ventas@worldkitchen.cl":        {pass:"wk2024", nombre:"Ventas WK",     empresa:"wk"},
 };
+
+const TOKENS = {
   wk: "25ce6bbbba3cbd8f886b3cab0df433973cea8e8c",
   ff: "38c76cc673bfc422645cfd721b9ef3d1e994d64b"
 };
@@ -218,33 +217,28 @@ async function bsale(ep, p={}){
   const u = new URL(BASE+"/"+ep);
   Object.entries(p).forEach(([k,v])=>u.searchParams.append(k,v));
   u.searchParams.append("access_token", token);
-  const r = await fetch(u.toString() + "&access_token=" + token);
-return r.json();
+  const r = await fetch(u.toString());
+  return r.json();
 }
 
-async function doLogin(){
+function doLogin(){
   const email = document.getElementById("loginEmail").value.trim().toLowerCase();
-  const pass = document.getElementById("loginPass").value.trim();
-  const emp = document.getElementById("loginEmpresa").value;
-  const err = document.getElementById("loginError");
+  const pass  = document.getElementById("loginPass").value.trim();
+  const emp   = document.getElementById("loginEmpresa").value;
+  const err   = document.getElementById("loginError");
   err.style.display = "none";
   if(!email||!pass){err.textContent="Completa todos los campos";err.style.display="block";return;}
-  token = TOKENS[emp];
-  try{
-    const d = await bsale("contacts.json",{email});
-    const c = (d.items||[]).find(x=>(x.email||"").toLowerCase()===email);
-    if(!c){err.textContent="Email no encontrado";err.style.display="block";return;}
-    const rut = (c.code||"").replace(/\./g,"").replace("-","");
-    if(pass!==rut&&pass!=="wk2024"){err.textContent="Contraseña incorrecta";err.style.display="block";return;}
-    clienteId=c.id;
-    clienteNombre=((c.firstName||"")+" "+(c.lastName||"")).trim()||c.company||email;
-    document.getElementById("topbarNombre").textContent=clienteNombre;
-    document.getElementById("topbarEmpresa").textContent=emp==="wk"?"World Kitchen Chile":"The Food Factory";
-    document.getElementById("screen-login").classList.remove("active");
-    document.getElementById("screen-portal").classList.add("active");
-    cargarInicio();
-    cargarCatalogo();
-  }catch(e){err.textContent="Error: "+e.message;err.style.display="block";}
+  const user = USUARIOS[email];
+  if(!user||user.pass!==pass){err.textContent="Email o contraseña incorrectos";err.style.display="block";return;}
+  token = TOKENS[user.empresa];
+  clienteNombre = user.nombre;
+  clienteId = null;
+  document.getElementById("topbarNombre").textContent = clienteNombre;
+  document.getElementById("topbarEmpresa").textContent = user.empresa==="wk"?"World Kitchen Chile":"The Food Factory";
+  document.getElementById("screen-login").classList.remove("active");
+  document.getElementById("screen-portal").classList.add("active");
+  cargarInicio();
+  cargarCatalogo();
 }
 
 function doLogout(){
@@ -262,32 +256,12 @@ function switchTab(name,el){
 }
 
 async function cargarInicio(){
-  const hoy=Math.floor(Date.now()/1000);
-  const ini=Math.floor(new Date(new Date().getFullYear(),new Date().getMonth(),1).getTime()/1000);
-  try{
-    const d=await bsale("documents.json",{clientId:clienteId,emissiondaterange:`[${ini},${hoy}]`,limit:50});
-    const items=d.items||[];
-    const total=items.reduce((s,x)=>s+(x.totalAmount||0),0);
-    document.getElementById("metricsCliente").innerHTML=`
-      <div class="metric"><div class="metric-label">Pedidos este mes</div><div class="metric-value">${d.count||0}</div></div>
-      <div class="metric"><div class="metric-label">Compras este mes</div><div class="metric-value">${fmt(total)}</div></div>`;
-    document.getElementById("tablaPedidosRecientes").innerHTML=items.length?`<table>
-      <thead><tr><th>N° Doc.</th><th>Fecha</th><th style="text-align:right">Total</th><th style="text-align:center">Estado</th></tr></thead>
-      <tbody>${items.slice(0,3).map(d=>`<tr><td>${d.number||"-"}</td><td>${d.emissionDate?new Date(d.emissionDate*1000).toLocaleDateString("es-CL"):"-"}</td><td style="text-align:right;font-weight:600">${fmt(d.totalAmount||0)}</td><td style="text-align:center"><span class="badge ${d.urlTimbre?"b-green":"b-teal"}">${d.urlTimbre?"Emitido":"Pendiente"}</span></td></tr>`).join("")}</tbody></table>`
-      :"<div class='loading'>Sin pedidos</div>";
-  }catch(e){document.getElementById("metricsCliente").innerHTML="<div class='loading'>Error al cargar</div>";}
+  document.getElementById("metricsCliente").innerHTML=`<div class="metric"><div class="metric-label">Bienvenido</div><div class="metric-value" style="font-size:16px">${clienteNombre}</div></div>`;
+  document.getElementById("tablaPedidosRecientes").innerHTML="<div class='loading'>Ingresa al catálogo para hacer tu primer pedido</div>";
 }
 
 async function cargarHistorial(){
-  const hoy=Math.floor(Date.now()/1000);
-  try{
-    const d=await bsale("documents.json",{clientId:clienteId,emissiondaterange:`[${hoy-180*86400},${hoy}]`,limit:50});
-    const items=(d.items||[]).sort((a,b)=>b.emissionDate-a.emissionDate);
-    document.getElementById("tablaHistorial").innerHTML=items.length?`<table>
-      <thead><tr><th>N° Doc.</th><th>Fecha</th><th style="text-align:right">Total</th><th style="text-align:center">Estado</th></tr></thead>
-      <tbody>${items.map(d=>`<tr><td>${d.number||"-"}</td><td>${d.emissionDate?new Date(d.emissionDate*1000).toLocaleDateString("es-CL"):"-"}</td><td style="text-align:right;font-weight:600">${fmt(d.totalAmount||0)}</td><td style="text-align:center"><span class="badge ${d.urlTimbre?"b-green":"b-teal"}">${d.urlTimbre?"Emitido":"Pendiente"}</span></td></tr>`).join("")}</tbody></table>`
-      :"<div class='loading'>Sin pedidos</div>";
-  }catch(e){document.getElementById("tablaHistorial").innerHTML="<div class='loading'>Error</div>";}
+  document.getElementById("tablaHistorial").innerHTML="<div class='loading'>Historial disponible próximamente</div>";
 }
 
 const emojis=["🍳","🥘","🔪","🍜","🪵","🫕","🧁","🥄","🍽️","🫙","🥗","🍲"];
@@ -306,7 +280,7 @@ async function cargarCatalogo(){
       }catch(e){continue;}
     }
     renderProductos();
-  }catch(e){document.getElementById("prodGrid").innerHTML="<div class='loading'>Error al cargar catálogo</div>";}
+  }catch(e){document.getElementById("prodGrid").innerHTML="<div class='loading'>Error al cargar catálogo: "+e.message+"</div>";}
 }
 
 function renderProductos(){
@@ -326,7 +300,7 @@ function renderProductos(){
           <button class="qty-btn" onclick="chQty('${p.id}',1)">+</button>
         </div>
       </div>
-    </div>`).join("")||"<div class='loading'>Sin productos</div>";
+    </div>`).join("")||"<div class='loading'>Sin productos disponibles</div>";
 }
 
 function chQty(id,d){
