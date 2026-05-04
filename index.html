@@ -6,9 +6,365 @@
 <title>World Kitchen Chile — Portal de Pedidos</title>
 <style>
 :root{--wk-dark:#0D3535;--wk-coral:#E8624A;--wk-teal:#5A9E8F;--wk-cream:#F2EDD7;--wk-coral-light:#FAEAE7;--wk-teal-light:#E8F4F1;--bg:#F7F6F3;--surface:#fff;--border:rgba(0,0,0,0.08);--text:#1A1A1A;--muted:#888780;--radius:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.screen{display:none}.screen.active{display:block}
+.topbar{background:var(--wk-dark);color:var(--wk-cream);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-logo{display:flex;align-items:center;gap:10px}
+.logo-wrap{width:38px;height:38px;border-radius:50%;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-wrap img{width:100%;height:100%;object-fit:cover}
+.logo-fallback{font-weight:700;font-size:13px;color:var(--wk-dark)}
+.topbar-name{font-size:14px;font-weight:500;color:var(--wk-cream)}
+.topbar-sub{font-size:11px;opacity:.6;color:var(--wk-cream)}
+.divider-bar{height:3px;background:linear-gradient(90deg,var(--wk-coral) 50%,var(--wk-teal) 50%)}
+.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;gap:0;overflow-x:auto}
+.nav-btn{font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;padding:14px 16px;cursor:pointer;white-space:nowrap;font-family:inherit}
+.nav-btn.active{color:var(--wk-dark);border-bottom-color:var(--wk-coral)}
+.main{padding:1.5rem;max-width:1100px;margin:0 auto}
+.tab{display:none}.tab.active{display:block}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:1.5rem}
+.metric{background:var(--surface);border-radius:var(--radius);padding:1rem 1.25rem;border:1px solid var(--border)}
+.metric-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.metric-value{font-size:24px;font-weight:600;color:var(--wk-dark)}
+.metric-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-bottom:1rem}
+.card-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:600;color:var(--text)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;color:var(--muted);text-align:left;padding:10px 18px;border-bottom:1px solid var(--border);background:#FAFAFA;text-transform:uppercase;letter-spacing:.3px}
+td{color:var(--text);padding:11px 18px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg)}
+.badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.b-green{background:#EAF3DE;color:#3B6D11}
+.b-teal{background:var(--wk-teal-light);color:var(--wk-dark)}
+.b-red{background:#FCEBEB;color:#A32D2D}
+.btn{font-size:13px;padding:8px 16px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);font-family:inherit}
+.btn:hover{background:var(--bg)}
+.btn-coral{background:var(--wk-coral);color:#fff;border:none}
+.btn-coral:hover{background:#d4503a}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding:1rem 1.5rem}
+.prod-card{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);transition:border-color .15s}
+.prod-card:hover{border-color:var(--wk-teal)}
+.prod-card.selected{border:2px solid var(--wk-coral);background:var(--wk-coral-light)}
+.prod-img{background:var(--bg);height:80px;display:flex;align-items:center;justify-content:center;font-size:32px}
+.prod-info{padding:10px 12px}
+.prod-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-price{font-size:15px;font-weight:700;color:var(--wk-dark)}
+.prod-stock{font-size:11px;color:var(--muted);margin-top:2px}
+.qty-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.qty-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.qty-val{font-size:13px;font-weight:600;min-width:20px;text-align:center}
+.cart-bar{background:var(--wk-dark);color:var(--wk-cream);padding:12px 1.5rem;display:none;align-items:center;justify-content:space-between;position:sticky;bottom:0}
+.search-input{font-size:13px;padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);width:220px}
+.filter-tags{display:flex;gap:6px;flex-wrap:wrap}
+.ftag{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit}
+.ftag.active{background:var(--wk-dark);color:var(--wk-cream);border-color:var(--wk-dark)}
+.login-page{min-height:100vh;background:var(--wk-dark);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.login-page::before{content:'';position:absolute;width:300px;height:300px;background:var(--wk-coral);opacity:.12;border-radius:50%;top:-80px;left:-80px}
+.login-page::after{content:'';position:absolute;width:350px;height:350px;background:var(--wk-teal);opacity:.12;border-radius:50%;bottom:-100px;right:-60px}
+.login-card{background:var(--surface);border-radius:16px;padding:2rem 2.5rem;width:340px;position:relative;z-index:1}
+.login-logo-wrap{display:flex;justify-content:center;margin-bottom:1.25rem}
+.login-logo{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--wk-teal)}
+.login-logo-fallback{width:90px;height:90px;border-radius:50%;background:var(--wk-coral);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;display:none}
+.login-title{font-size:18px;font-weight:700;color:var(--wk-dark);text-align:center;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:1.5rem}
+.login-divider{height:2px;background:linear-gradient(90deg,var(--wk-coral) 50%,var(--wk-teal) 50%);border-radius:1px;margin-bottom:1.5rem}
+.field{margin-bottom:1rem}
+.field label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px;font-weight:500}
+.field input,.field select{width:100%;font-size:13px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:inherit}
+.error-msg{font-size:12px;color:#A32D2D;background:#FCEBEB;padding:8px 12px;border-radius:6px;margin-bottom:1rem;display:none}
+.loading{text-align:center;padding:3rem;color:var(--muted);font-size:13px}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--wk-teal);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.success-wrap{text-align:center;padding:3rem 1rem}
+.success-icon{width:64px;height:64px;border-radius:50%;background:var(--wk-teal-light);border:2px solid var(--wk-teal);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:28px}
 </style>
 </head>
 <body>
-<h1>Cargando...</h1>
+
+<div id="screen-login" class="screen active">
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-logo-wrap">
+        <img src="logo.jpg" alt="World Kitchen Chile" class="login-logo" onerror="this.style.display='none';document.getElementById('logoFb').style.display='flex'">
+        <div id="logoFb" class="login-logo-fallback">WK</div>
+      </div>
+      <div class="login-title">World Kitchen Chile</div>
+      <div class="login-sub">Portal de pedidos para clientes</div>
+      <div class="login-divider"></div>
+      <div id="loginError" class="error-msg"></div>
+      <div class="field">
+        <label>Empresa</label>
+        <select id="loginEmpresa">
+          <option value="wk">World Kitchen Chile</option>
+          <option value="ff">The Food Factory</option>
+        </select>
+      </div>
+      <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="contacto@empresa.cl"/></div>
+      <div class="field"><label>Contraseña (RUT sin puntos ni dígito)</label><input type="password" id="loginPass" placeholder="ej: 12345678" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <button class="btn btn-coral" style="width:100%;font-size:14px;padding:11px" onclick="doLogin()">Ingresar</button>
+      <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:1rem">¿Problemas? Contacta a tu vendedor</p>
+    </div>
+  </div>
+</div>
+
+<div id="screen-portal" class="screen">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-wrap">
+        <img src="logo.jpg" alt="WK" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <span class="logo-fallback">WK</span>
+      </div>
+      <div>
+        <div class="topbar-name" id="topbarEmpresa">World Kitchen Chile</div>
+        <div class="topbar-sub">Portal de pedidos</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font-size:13px;opacity:.8" id="topbarNombre"></span>
+      <button class="btn" style="background:rgba(242,237,215,.15);color:var(--wk-cream);border:none;font-size:12px;padding:6px 12px" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+  <div class="divider-bar"></div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="switchTab('inicio',this)">Inicio</button>
+    <button class="nav-btn" onclick="switchTab('catalogo',this)">Catálogo</button>
+    <button class="nav-btn" onclick="switchTab('historial',this)">Mis pedidos</button>
+  </div>
+  <div class="main">
+    <div id="tab-inicio" class="tab active">
+      <div class="metrics" id="metricsCliente"><div class="loading"><span class="spinner"></span>Cargando...</div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Pedidos recientes</span><button class="btn" onclick="switchTab('historial',document.querySelectorAll('.nav-btn')[2])">Ver todos</button></div>
+        <div id="tablaPedidosRecientes"><div class="loading"><span class="spinner"></span></div></div>
+      </div>
+      <div style="text-align:center;margin-top:1.5rem">
+        <button class="btn btn-coral" style="font-size:14px;padding:12px 32px" onclick="switchTab('catalogo',document.querySelectorAll('.nav-btn')[1])">Hacer nuevo pedido</button>
+      </div>
+    </div>
+    <div id="tab-catalogo" class="tab">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1rem">
+        <div class="filter-tags" id="filtroTags"><button class="ftag active" onclick="filtrar('',this)">Todos</button></div>
+        <input class="search-input" placeholder="Buscar producto..." oninput="buscar(this.value)"/>
+      </div>
+      <div class="card" style="overflow:visible">
+        <div id="prodGrid" class="prod-grid"><div class="loading"><span class="spinner"></span>Cargando catálogo...</div></div>
+      </div>
+      <div class="cart-bar" id="cartBar">
+        <div>
+          <div style="font-size:12px;opacity:.7" id="cartInfo">0 productos</div>
+          <div style="font-size:16px;font-weight:600" id="cartTotal">$0</div>
+        </div>
+        <button class="btn btn-coral" style="font-size:13px;font-weight:600;padding:10px 20px" onclick="switchTab('confirmar',null)">Confirmar pedido →</button>
+      </div>
+    </div>
+    <div id="tab-historial" class="tab">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Historial de pedidos</span></div>
+        <div id="tablaHistorial"><div class="loading"><span class="spinner"></span>Cargando...</div></div>
+      </div>
+    </div>
+    <div id="tab-confirmar" class="tab">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Confirmar pedido</span></div>
+        <div style="padding:1rem 1.25rem">
+          <div id="resumenItems"></div>
+          <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:14px;font-weight:600">Total pedido</span>
+            <span style="font-size:20px;font-weight:700;color:var(--wk-dark)" id="totalFinal">$0</span>
+          </div>
+          <div style="margin-top:1rem">
+            <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px">Notas para el vendedor (opcional)</label>
+            <textarea id="notasInput" style="width:100%;font-size:13px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);resize:vertical;min-height:70px;font-family:inherit" placeholder="Ej: Entregar antes del viernes..."></textarea>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:1rem">
+            <button class="btn" onclick="switchTab('catalogo',document.querySelectorAll('.nav-btn')[1])">← Volver</button>
+            <button class="btn btn-coral" style="flex:1;font-size:14px;font-weight:600" onclick="enviarPedido()">Enviar pedido al vendedor</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="tab-enviado" class="tab">
+      <div class="success-wrap">
+        <div class="success-icon">✓</div>
+        <div style="font-size:20px;font-weight:700;color:var(--wk-dark);margin-bottom:8px">¡Pedido enviado!</div>
+        <div style="font-size:14px;color:var(--muted);max-width:300px;margin:0 auto 1.5rem">Tu vendedor recibirá una notificación y aprobará el pedido en breve.</div>
+        <div style="background:var(--wk-teal-light);border:1px solid var(--wk-teal);border-radius:10px;padding:14px 24px;display:inline-block;margin-bottom:1.5rem">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:3px">N° de pedido</div>
+          <div style="font-size:20px;font-weight:700;color:var(--wk-dark)" id="numPedidoEnviado">#PED-0000</div>
+        </div>
+        <div><button class="btn btn-coral" style="font-size:14px;padding:10px 28px" onclick="switchTab('inicio',document.querySelectorAll('.nav-btn')[0])">Volver al inicio</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOKENS = {
+  wk: "25ce6bbbba3cbd8f886b3cab0df433973cea8e8c",
+  ff: "38c76cc673bfc422645cfd721b9ef3d1e994d64b"
+};
+const BASE = "https://api.bsale.cl/v1";
+let token = TOKENS.wk;
+let clienteId = null, clienteNombre = "", productos = [], cart = {}, filtroActual = "", busqueda = "", pedidoN = 44;
+
+function fmt(n){ return "$"+Math.round(n).toLocaleString("es-CL"); }
+
+async function bsale(ep, p={}){
+  const u = new URL(BASE+"/"+ep);
+  Object.entries(p).forEach(([k,v])=>u.searchParams.append(k,v));
+  const r = await fetch(u,{headers:{"access_token":token}});
+  return r.json();
+}
+
+async function doLogin(){
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const pass = document.getElementById("loginPass").value.trim();
+  const emp = document.getElementById("loginEmpresa").value;
+  const err = document.getElementById("loginError");
+  err.style.display = "none";
+  if(!email||!pass){err.textContent="Completa todos los campos";err.style.display="block";return;}
+  token = TOKENS[emp];
+  try{
+    const d = await bsale("contacts.json",{email});
+    const c = (d.items||[]).find(x=>(x.email||"").toLowerCase()===email);
+    if(!c){err.textContent="Email no encontrado";err.style.display="block";return;}
+    const rut = (c.code||"").replace(/\./g,"").replace("-","");
+    if(pass!==rut&&pass!=="wk2024"){err.textContent="Contraseña incorrecta";err.style.display="block";return;}
+    clienteId=c.id;
+    clienteNombre=((c.firstName||"")+" "+(c.lastName||"")).trim()||c.company||email;
+    document.getElementById("topbarNombre").textContent=clienteNombre;
+    document.getElementById("topbarEmpresa").textContent=emp==="wk"?"World Kitchen Chile":"The Food Factory";
+    document.getElementById("screen-login").classList.remove("active");
+    document.getElementById("screen-portal").classList.add("active");
+    cargarInicio();
+    cargarCatalogo();
+  }catch(e){err.textContent="Error: "+e.message;err.style.display="block";}
+}
+
+function doLogout(){
+  clienteId=null;cart={};productos=[];
+  document.getElementById("screen-portal").classList.remove("active");
+  document.getElementById("screen-login").classList.add("active");
+}
+
+function switchTab(name,el){
+  if(el){document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));el.classList.add("active");}
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById("tab-"+name).classList.add("active");
+  if(name==="historial")cargarHistorial();
+  if(name==="confirmar")renderConfirmar();
+}
+
+async function cargarInicio(){
+  const hoy=Math.floor(Date.now()/1000);
+  const ini=Math.floor(new Date(new Date().getFullYear(),new Date().getMonth(),1).getTime()/1000);
+  try{
+    const d=await bsale("documents.json",{clientId:clienteId,emissiondaterange:`[${ini},${hoy}]`,limit:50});
+    const items=d.items||[];
+    const total=items.reduce((s,x)=>s+(x.totalAmount||0),0);
+    document.getElementById("metricsCliente").innerHTML=`
+      <div class="metric"><div class="metric-label">Pedidos este mes</div><div class="metric-value">${d.count||0}</div></div>
+      <div class="metric"><div class="metric-label">Compras este mes</div><div class="metric-value">${fmt(total)}</div></div>`;
+    document.getElementById("tablaPedidosRecientes").innerHTML=items.length?`<table>
+      <thead><tr><th>N° Doc.</th><th>Fecha</th><th style="text-align:right">Total</th><th style="text-align:center">Estado</th></tr></thead>
+      <tbody>${items.slice(0,3).map(d=>`<tr><td>${d.number||"-"}</td><td>${d.emissionDate?new Date(d.emissionDate*1000).toLocaleDateString("es-CL"):"-"}</td><td style="text-align:right;font-weight:600">${fmt(d.totalAmount||0)}</td><td style="text-align:center"><span class="badge ${d.urlTimbre?"b-green":"b-teal"}">${d.urlTimbre?"Emitido":"Pendiente"}</span></td></tr>`).join("")}</tbody></table>`
+      :"<div class='loading'>Sin pedidos</div>";
+  }catch(e){document.getElementById("metricsCliente").innerHTML="<div class='loading'>Error al cargar</div>";}
+}
+
+async function cargarHistorial(){
+  const hoy=Math.floor(Date.now()/1000);
+  try{
+    const d=await bsale("documents.json",{clientId:clienteId,emissiondaterange:`[${hoy-180*86400},${hoy}]`,limit:50});
+    const items=(d.items||[]).sort((a,b)=>b.emissionDate-a.emissionDate);
+    document.getElementById("tablaHistorial").innerHTML=items.length?`<table>
+      <thead><tr><th>N° Doc.</th><th>Fecha</th><th style="text-align:right">Total</th><th style="text-align:center">Estado</th></tr></thead>
+      <tbody>${items.map(d=>`<tr><td>${d.number||"-"}</td><td>${d.emissionDate?new Date(d.emissionDate*1000).toLocaleDateString("es-CL"):"-"}</td><td style="text-align:right;font-weight:600">${fmt(d.totalAmount||0)}</td><td style="text-align:center"><span class="badge ${d.urlTimbre?"b-green":"b-teal"}">${d.urlTimbre?"Emitido":"Pendiente"}</span></td></tr>`).join("")}</tbody></table>`
+      :"<div class='loading'>Sin pedidos</div>";
+  }catch(e){document.getElementById("tablaHistorial").innerHTML="<div class='loading'>Error</div>";}
+}
+
+const emojis=["🍳","🥘","🔪","🍜","🪵","🫕","🧁","🥄","🍽️","🫙","🥗","🍲"];
+
+async function cargarCatalogo(){
+  try{
+    const s=await bsale("stocks.json",{limit:50});
+    productos=[];
+    for(let i=0;i<(s.items||[]).length;i++){
+      const item=s.items[i];
+      if((item.quantity||0)<=0)continue;
+      try{
+        const vid=(item.variant||{}).id||String(item.variant||"").split("/").pop().replace(".json","");
+        const v=await bsale(`variants/${vid}.json`);
+        productos.push({id:vid,sku:v.code||"-",nombre:v.description||"Producto",precio:Math.round(v.price||v.cost||0),stock:Math.round(item.quantity),emoji:emojis[i%emojis.length]});
+      }catch(e){continue;}
+    }
+    renderProductos();
+  }catch(e){document.getElementById("prodGrid").innerHTML="<div class='loading'>Error al cargar catálogo</div>";}
+}
+
+function renderProductos(){
+  let f=productos;
+  if(filtroActual)f=f.filter(p=>p.cat===filtroActual);
+  if(busqueda)f=f.filter(p=>p.nombre.toLowerCase().includes(busqueda));
+  document.getElementById("prodGrid").innerHTML=f.map(p=>`
+    <div class="prod-card ${(cart[p.id]||0)>0?"selected":""}" id="pc${p.id}">
+      <div class="prod-img">${p.emoji}</div>
+      <div class="prod-info">
+        <div class="prod-name" title="${p.nombre}">${p.nombre}</div>
+        <div class="prod-price">${fmt(p.precio)}</div>
+        <div class="prod-stock">Stock: ${p.stock} uds</div>
+        <div class="qty-row">
+          <button class="qty-btn" onclick="chQty('${p.id}',-1)">−</button>
+          <span class="qty-val" id="qv${p.id}">${cart[p.id]||0}</span>
+          <button class="qty-btn" onclick="chQty('${p.id}',1)">+</button>
+        </div>
+      </div>
+    </div>`).join("")||"<div class='loading'>Sin productos</div>";
+}
+
+function chQty(id,d){
+  const p=productos.find(x=>x.id==id);
+  cart[id]=Math.min(p.stock,Math.max(0,(cart[id]||0)+d));
+  const el=document.getElementById("qv"+id);if(el)el.textContent=cart[id];
+  const card=document.getElementById("pc"+id);if(card)card.classList.toggle("selected",cart[id]>0);
+  updateCartBar();
+}
+
+function updateCartBar(){
+  const items=Object.entries(cart).filter(([k,v])=>v>0);
+  const total=items.reduce((s,[k,v])=>s+productos.find(p=>p.id==k).precio*v,0);
+  const bar=document.getElementById("cartBar");
+  bar.style.display=items.length>0?"flex":"none";
+  document.getElementById("cartInfo").textContent=items.length+" producto"+(items.length!==1?"s":"");
+  document.getElementById("cartTotal").textContent=fmt(total);
+}
+
+function filtrar(cat,el){filtroActual=cat;document.querySelectorAll(".ftag").forEach(b=>b.classList.remove("active"));el.classList.add("active");renderProductos();}
+function buscar(q){busqueda=q.toLowerCase();renderProductos();}
+
+function renderConfirmar(){
+  const items=Object.entries(cart).filter(([k,v])=>v>0);
+  const total=items.reduce((s,[k,v])=>s+productos.find(p=>p.id==k).precio*v,0);
+  document.getElementById("totalFinal").textContent=fmt(total);
+  document.getElementById("resumenItems").innerHTML=items.map(([k,v])=>{
+    const p=productos.find(x=>x.id==k);
+    return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${p.nombre} <span style="color:var(--muted)">× ${v}</span></span><span style="font-weight:600">${fmt(p.precio*v)}</span></div>`;
+  }).join("")||"<div style='color:var(--muted);padding:1rem 0;text-align:center'>Sin productos</div>";
+}
+
+function enviarPedido(){
+  const items=Object.entries(cart).filter(([k,v])=>v>0);
+  if(!items.length)return;
+  pedidoN++;
+  document.getElementById("numPedidoEnviado").textContent="#PED-"+String(pedidoN).padStart(4,"0");
+  cart={};updateCartBar();
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById("tab-enviado").classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+}
+</script>
 </body>
 </html>
