@@ -216,14 +216,10 @@ function fmt(n){ return "$"+Math.round(n).toLocaleString("es-CL"); }
 async function bsale(ep, p={}){
   const u = new URL(BASE+"/"+ep);
   Object.entries(p).forEach(([k,v])=>u.searchParams.append(k,v));
-  const targetUrl = encodeURIComponent(u.toString());
-  const r = await fetch("https://corsproxy.io/?" + targetUrl, {
-    headers: {
-      "access_token": token,
-      "x-cors-headers": JSON.stringify({"access_token": token})
-    }
-  });
-  return r.json();
+  u.searchParams.append("access_token", token);
+  const r = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(u.toString()));
+  const d = await r.json();
+  return JSON.parse(d.contents);
 }
 function doLogin(){
   const email = document.getElementById("loginEmail").value.trim().toLowerCase();
