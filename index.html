@@ -216,9 +216,13 @@ function fmt(n){ return "$"+Math.round(n).toLocaleString("es-CL"); }
 async function bsale(ep, p={}){
   const u = new URL(BASE+"/"+ep);
   Object.entries(p).forEach(([k,v])=>u.searchParams.append(k,v));
-  u.searchParams.append("access_token", token);
-  const proxy = "https://corsproxy.io/?" + encodeURIComponent(u.toString());
-  const r = await fetch(proxy);
+  const targetUrl = encodeURIComponent(u.toString());
+  const r = await fetch("https://corsproxy.io/?" + targetUrl, {
+    headers: {
+      "access_token": token,
+      "x-cors-headers": JSON.stringify({"access_token": token})
+    }
+  });
   return r.json();
 }
 function doLogin(){
