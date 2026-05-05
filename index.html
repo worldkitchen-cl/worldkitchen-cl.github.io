@@ -217,10 +217,10 @@ async function bsale(ep, p={}){
   const u = new URL(BASE+"/"+ep);
   Object.entries(p).forEach(([k,v])=>u.searchParams.append(k,v));
   u.searchParams.append("access_token", token);
-  const r = await fetch(u.toString());
+  const proxy = "https://corsproxy.io/?" + encodeURIComponent(u.toString());
+  const r = await fetch(proxy);
   return r.json();
 }
-
 function doLogin(){
   const email = document.getElementById("loginEmail").value.trim().toLowerCase();
   const pass  = document.getElementById("loginPass").value.trim();
