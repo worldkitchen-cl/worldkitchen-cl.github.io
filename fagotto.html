@@ -227,7 +227,9 @@ async function doLogin(){
   if(!rut){err.textContent="Selecciona tu local";err.style.background="#FCEBEB";err.style.color="#A32D2D";err.style.display="block";return;}
   if(!pass){err.textContent="Ingresa tu contraseña";err.style.background="#FCEBEB";err.style.color="#A32D2D";err.style.display="block";return;}
   const rutBase=rut.replace(/\./g,"").split("-")[0];
-  if(pass!==rutBase&&pass!=="fagotto2024"){err.textContent="Contraseña incorrecta. Usa tu RUT sin puntos ni dígito verificador";err.style.background="#FCEBEB";err.style.color="#A32D2D";err.style.display="block";return;}
+const rutCompleto=rut.replace(/\./g,"");
+const rutConGuion=rut;
+if(pass!==rutBase&&pass!==rutCompleto&&pass!==rutConGuion&&pass!=="fagotto2024"){err.textContent="Contraseña incorrecta. Usa tu RUT sin puntos ni dígito verificador";err.style.background="#FCEBEB";err.style.color="#A32D2D";err.style.display="block";return;}
   err.textContent="Buscando tu local en BSALE...";err.style.background="#E8F4F1";err.style.color="#0D3535";err.style.display="block";
   try{
     const d=await bsale("contacts.json",{code:rut,limit:5});
