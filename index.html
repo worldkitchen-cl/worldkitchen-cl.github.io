@@ -214,10 +214,9 @@ let clienteId = null, clienteNombre = "", productos = [], cart = {}, filtroActua
 function fmt(n){ return "$"+Math.round(n).toLocaleString("es-CL"); }
 
 async function bsale(ep, p={}){
-  const u = new URL(BASE+"/"+ep);
-  Object.entries(p).forEach(([k,v])=>u.searchParams.append(k,v));
-  u.searchParams.append("access_token", token);
-  const r = await fetch("https://thingproxy.freeboard.io/fetch/" + u.toString());
+  const params = new URLSearchParams(p);
+  params.append("access_token", token);
+  const r = await fetch(`https://wk-proxy.onrender.com/bsale/${ep}?${params.toString()}`);
   return r.json();
 }
 function doLogin(){
