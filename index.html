@@ -266,24 +266,28 @@ const emojis=["🍳","🥘","🔪","🍜","🪵","🫕","🧁","🥄","🍽️",
 
 async function cargarCatalogo(){
   try{
-    const s=await bsale("stocks.json",{limit:50});
-    productos=[];
-    const items=(s.items||[]).filter(x=>(x.quantity||0)>0);
-    for(let i=0;i<items.length;i++){
-      const item=items[i];
-      try{
-        const variantHref = item.variant && item.variant.href ? item.variant.href : "";
-        const vid = item.variant && item.variant.id ? item.variant.id : variantHref.split("/").pop().replace(".json","");
-        if(!vid) continue;
-        const v=await bsale(`variants/${vid}.json`);
-        const nombre = v.description || v.barCode || "Producto";
-        const precio = Math.round(v.price || v.cost || 0);
-        if(precio === 0 && nombre === "Producto") continue;
-        productos.push({id:vid,sku:v.code||"-",nombre,precio,stock:Math.round(item.quantity),emoji:emojis[i%emojis.length]});
-      }catch(e){continue;}
+    const r = await bsale("products.json", {limit:50, state:0, expand:"[variants]"});
+    productos = [];
+    let i = 0;
+    for(const prod of (r.items||[])){
+      const variantes = prod.variants && prod.variants.items ? prod.variants.items : [];
+      for(const v of variantes){
+        if(v.state !== 0) continue;
+        productos.push({
+          id: v.id,
+          sku: v.code || "-",
+          nombre: prod.name + (variantes.length > 1 ? " - " + v.description : ""),
+          precio: Math.round(v.price || v.cost || 0),
+          stock: 99,
+          emoji: emojis[i % emojis.length]
+        });
+        i++;
+      }
     }
     renderProductos();
-  }catch(e){document.getElementById("prodGrid").innerHTML="<div class='loading'>Error: "+e.message+"</div>";}
+  }catch(e){
+    document.getElementById("prodGrid").innerHTML="<div class='loading'>Error: "+e.message+"</div>";
+  }
 }
 
 function renderProductos(){
