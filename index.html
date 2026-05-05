@@ -217,9 +217,8 @@ async function bsale(ep, p={}){
   const u = new URL(BASE+"/"+ep);
   Object.entries(p).forEach(([k,v])=>u.searchParams.append(k,v));
   u.searchParams.append("access_token", token);
-  const r = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(u.toString()));
-  const d = await r.json();
-  return JSON.parse(d.contents);
+  const r = await fetch("https://thingproxy.freeboard.io/fetch/" + u.toString());
+  return r.json();
 }
 function doLogin(){
   const email = document.getElementById("loginEmail").value.trim().toLowerCase();
