@@ -102,7 +102,7 @@ tr:hover td{background:var(--bg)}
       </div>
       <div class="field">
         <label>Contraseña (RUT sin puntos ni dígito verificador)</label>
-        <input type="password" id="loginPass" placeholder="ej: 78043662" onkeydown="if(event.key==='Enter')doLogin()"/>
+        <input type="password" id="loginPass" placeholder="ej: 77937886" onkeydown="if(event.key==='Enter')doLogin()"/>
       </div>
       <button class="btn btn-coral" style="width:100%;font-size:14px;padding:11px" onclick="doLogin()">Ingresar</button>
       <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:1rem">¿Problemas? Contacta a World Kitchen</p>
@@ -133,7 +133,7 @@ tr:hover td{background:var(--bg)}
     <div id="tab-inicio" class="tab active">
       <div class="metrics" id="metricsInicio"><div class="loading"><span class="spinner"></span>Cargando...</div></div>
       <div class="card" id="cardVencidas" style="display:none">
-        <div class="card-header"><span class="card-title" style="color:#E24B4A">⚠️ Facturas vencidas por pagar</span></div>
+        <div class="card-header"><span class="card-title" style="color:#E24B4A">⚠️ Facturas pendientes de pago</span></div>
         <div id="listaVencidas" style="padding:14px 18px"></div>
       </div>
       <div class="sugerido-banner" id="sugeridoBanner" style="display:none">
@@ -227,18 +227,21 @@ async function doLogin(){
   if(!rut){err.textContent="Selecciona tu local";err.style.background="#FCEBEB";err.style.color="#A32D2D";err.style.display="block";return;}
   if(!pass){err.textContent="Ingresa tu contraseña";err.style.background="#FCEBEB";err.style.color="#A32D2D";err.style.display="block";return;}
   const rutBase=rut.replace(/\./g,"").split("-")[0];
-const rutCompleto=rut.replace(/\./g,"");
-const rutConGuion=rut;
-if(pass!==rutBase&&pass!==rutCompleto&&pass!==rutConGuion&&pass!=="fagotto2024"){err.textContent="Contraseña incorrecta. Usa tu RUT sin puntos ni dígito verificador";err.style.background="#FCEBEB";err.style.color="#A32D2D";err.style.display="block";return;}
-  err.textContent="Buscando tu local en BSALE...";err.style.background="#E8F4F1";err.style.color="#0D3535";err.style.display="block";
+  const rutCompleto=rut.replace(/\./g,"");
+  if(pass!==rutBase&&pass!==rutCompleto&&pass!==rut&&pass!=="fagotto2024"){
+    err.textContent="Contraseña incorrecta. Usa tu RUT sin puntos ni dígito verificador";
+    err.style.background="#FCEBEB";err.style.color="#A32D2D";err.style.display="block";return;
+  }
+  err.textContent="Buscando tu local en BSALE...";
+  err.style.background="#E8F4F1";err.style.color="#0D3535";err.style.display="block";
   try{
-    const d=await bsale("contacts.json",{code:rut,limit:5});
+    const d=await bsale("clients.json",{code:rut,limit:5});
     let cliente=(d.items||[]).find(x=>x.code===rut||(x.code||"").replace(/\./g,"")==rut.replace(/\./g,""));
     if(!cliente&&d.items&&d.items.length>0)cliente=d.items[0];
     if(!cliente){err.textContent="Local no encontrado. Contacta a World Kitchen.";err.style.background="#FCEBEB";err.style.color="#A32D2D";return;}
     clienteId=cliente.id;
     clienteNombre=cliente.company||cliente.firstName||"Local FAGOTTO";
-    priceListId=cliente.priceListId||null;
+    priceListId=cliente.price_list&&cliente.price_list.id?cliente.price_list.id:null;
     const localNombre=document.getElementById("loginLocal").options[document.getElementById("loginLocal").selectedIndex].text.split("—")[0].trim();
     document.getElementById("topbarLocal").textContent="FAGOTTO "+localNombre;
     document.getElementById("topbarRazon").textContent=clienteNombre;
@@ -253,7 +256,11 @@ if(pass!==rutBase&&pass!==rutCompleto&&pass!==rutConGuion&&pass!=="fagotto2024")
     cargarProductos();
   }catch(e){err.textContent="Error: "+e.message;err.style.background="#FCEBEB";err.style.color="#A32D2D";}
 }
-function doLogout(){clienteId=null;cart={};productos=[];documentos=[];document.getElementById("screen-portal").classList.remove("active");document.getElementById("screen-login").classList.add("active");}
+function doLogout(){
+  clienteId=null;cart={};productos=[];documentos=[];
+  document.getElementById("screen-portal").classList.remove("active");
+  document.getElementById("screen-login").classList.add("active");
+}
 function switchTab(name,el){
   if(el){document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));el.classList.add("active");}
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
@@ -271,10 +278,10 @@ async function cargarInicio(){
     const montoVencido=vencidas.reduce((s,x)=>s+(x.totalAmount||0),0);
     document.getElementById("metricsInicio").innerHTML=`
       <div class="metric"><div class="metric-label">Pedidos 6 meses</div><div class="metric-value">${documentos.length}</div></div>
-      <div class="metric danger"><div class="metric-label">Facturas vencidas</div><div class="metric-value">${vencidas.length}</div><div class="metric-sub">${fmt(montoVencido)}</div></div>
+      <div class="metric danger"><div class="metric-label">Facturas pendientes</div><div class="metric-value">${vencidas.length}</div><div class="metric-sub">${fmt(montoVencido)}</div></div>
       <div class="metric"><div class="metric-label">Compras totales 6m</div><div class="metric-value">${fmt(deudaTotal)}</div></div>
       <div class="metric"><div class="metric-label">Último pedido</div><div class="metric-value" style="font-size:14px">${documentos.length>0?fmtFecha(documentos[0].emissionDate):"Sin registro"}</div></div>`;
-    document.getElementById("topbarAlerta").textContent=vencidas.length>0?`⚠️ ${vencidas.length} factura${vencidas.length>1?"s":""} vencida${vencidas.length>1?"s":""}` :"";
+    document.getElementById("topbarAlerta").textContent=vencidas.length>0?`⚠️ ${vencidas.length} factura${vencidas.length>1?"s":""} pendiente${vencidas.length>1?"s":""}` :"";
     if(vencidas.length>0){
       document.getElementById("cardVencidas").style.display="block";
       document.getElementById("listaVencidas").innerHTML=vencidas.slice(0,5).map(v=>`<div class="factura-vencida"><strong>Doc N° ${v.number||"-"}</strong> · ${fmtFecha(v.emissionDate)} · <strong style="color:#E24B4A">${fmt(v.totalAmount)}</strong></div>`).join("");
@@ -300,13 +307,11 @@ async function cargarProductos(){
     if(priceListId)params.priceListId=priceListId;
     const r=await bsale("products.json",params);
     productos=[];
-    let i=0;
     for(const prod of(r.items||[])){
       const variantes=prod.variants&&prod.variants.items?prod.variants.items:[];
       for(const v of variantes){
         if(v.state!==0)continue;
         productos.push({id:v.id,sku:v.code||"-",nombre:prod.name+(variantes.length>1?" - "+v.description:""),precio:Math.round(v.price||v.cost||0)});
-        i++;
       }
     }
     document.getElementById("productosCount").textContent=`${productos.length} productos con precios FAGOTTO`;
